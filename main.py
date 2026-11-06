@@ -1,3 +1,4 @@
+
 import streamlit as st
 import json
 import uuid
@@ -158,18 +159,41 @@ st.markdown("""
     color: #F4EAF5;
 }
 
+/* Headings */
 h1, h2, h3 {
     color: #E8DDED !important;
 }
 
+/* General text */
 p, label, span {
     color: #E8DDED;
 }
 
+/* Sidebar */
 [data-testid="stSidebar"] {
     background-color: #210F1B;
 }
 
+/* Information boxes */
+[data-testid="stAlert"],
+.stAlert {
+    background-color: #2A1825 !important;
+    border: 1px solid #75435D !important;
+    color: #F4EAF5 !important;
+}
+
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] div,
+[data-testid="stAlert"] span {
+    color: #F4EAF5 !important;
+}
+
+/* Sidebar information box */
+[data-testid="stSidebar"] [data-testid="stAlert"] {
+    background-color: #2A1825 !important;
+}
+
+/* Buttons */
 .stButton button {
     background-color: #75435D;
     color: white;
@@ -182,10 +206,16 @@ p, label, span {
     color: #160B12;
 }
 
+/* Text boxes */
 input, textarea {
     background-color: #2A1825 !important;
     color: white !important;
 }
+
+[data-baseweb="select"] {
+    background-color: #2A1825 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
