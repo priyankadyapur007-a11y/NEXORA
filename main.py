@@ -1,4 +1,3 @@
-
 import streamlit as st
 import json
 import uuid
@@ -25,7 +24,6 @@ category_colors = {
 }
 
 
-# Load saved notes
 def load_data():
     if not DATA_FILE.exists():
         return []
@@ -38,13 +36,11 @@ def load_data():
         return []
 
 
-# Save notes
 def save_data(notes):
     with open(DATA_FILE, "w") as f:
         json.dump(notes, f, indent=4)
 
 
-# Delete a note
 def delete_note(note_id):
     st.session_state.notes = [
         n for n in st.session_state.notes if n["id"] != note_id
@@ -52,7 +48,25 @@ def delete_note(note_id):
     save_data(st.session_state.notes)
 
 
-# Find notes that have similar words
+def show_message(message):
+    st.markdown(
+        f"""
+        <div style="
+            background-color: #2A1825;
+            color: #F4EAF5;
+            padding: 18px;
+            border: 1px solid #75435D;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 15px;
+        ">
+            {message}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 def calculate_similarity(notes):
     if len(notes) < 2:
         return []
@@ -78,7 +92,6 @@ def calculate_similarity(notes):
     return connections
 
 
-# Create the 3D graph
 def build_graph(notes, connections):
     fig = go.Figure()
 
@@ -98,7 +111,6 @@ def build_graph(notes, connections):
         y_positions.append(math.sin(angle) * 5)
         z_positions.append(math.sin(angle * 2) * 2)
 
-    # Draw lines between related notes
     for idx_a, idx_b, score in connections:
         fig.add_trace(go.Scatter3d(
             x=[x_positions[idx_a], x_positions[idx_b]],
@@ -110,7 +122,6 @@ def build_graph(notes, connections):
             showlegend=False
         ))
 
-    # Show each note
     for i, note in enumerate(notes):
         fig.add_trace(go.Scatter3d(
             x=[x_positions[i]],
@@ -146,12 +157,10 @@ def build_graph(notes, connections):
     return fig
 
 
-# Start the app
 if "notes" not in st.session_state:
     st.session_state.notes = load_data()
 
 
-# App colours
 st.markdown("""
 <style>
 .stApp {
@@ -159,41 +168,18 @@ st.markdown("""
     color: #F4EAF5;
 }
 
-/* Headings */
 h1, h2, h3 {
     color: #E8DDED !important;
 }
 
-/* General text */
-p, label, span {
+p, label {
     color: #E8DDED;
 }
 
-/* Sidebar */
 [data-testid="stSidebar"] {
     background-color: #210F1B;
 }
 
-/* Information boxes */
-[data-testid="stAlert"],
-.stAlert {
-    background-color: #2A1825 !important;
-    border: 1px solid #75435D !important;
-    color: #F4EAF5 !important;
-}
-
-[data-testid="stAlert"] p,
-[data-testid="stAlert"] div,
-[data-testid="stAlert"] span {
-    color: #F4EAF5 !important;
-}
-
-/* Sidebar information box */
-[data-testid="stSidebar"] [data-testid="stAlert"] {
-    background-color: #2A1825 !important;
-}
-
-/* Buttons */
 .stButton button {
     background-color: #75435D;
     color: white;
@@ -206,7 +192,6 @@ p, label, span {
     color: #160B12;
 }
 
-/* Text boxes */
 input, textarea {
     background-color: #2A1825 !important;
     color: white !important;
@@ -216,11 +201,21 @@ input, textarea {
     background-color: #2A1825 !important;
 }
 
+[data-testid="stMetric"] {
+    background-color: #2A1825;
+    border: 1px solid #75435D;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+[data-testid="stMetricLabel"],
+[data-testid="stMetricValue"] {
+    color: #E8DDED !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
 
-# Sidebar
 st.sidebar.title("Nexora 🌙")
 
 view_mode = st.sidebar.radio(
@@ -229,16 +224,32 @@ view_mode = st.sidebar.radio(
 )
 
 st.sidebar.divider()
-st.sidebar.info(f"Total Notes Saved: {len(st.session_state.notes)}")
+
+st.sidebar.markdown(
+    f"""
+    <div style="
+        background-color: #2A1825;
+        color: #F4EAF5;
+        padding: 15px;
+        border: 1px solid #75435D;
+        border-radius: 10px;
+        font-size: 15px;
+    ">
+        Total Notes Saved: {len(st.session_state.notes)}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
-# Dashboard
 if view_mode == "Dashboard":
 
     st.title("My Workspace")
 
     if not st.session_state.notes:
-        st.info("Your notebook is empty. Head over to 'Add New Note' to start.")
+        show_message(
+            "Your notebook is empty. Head over to 'Add New Note' to start."
+        )
 
     else:
         all_connections = calculate_similarity(st.session_state.notes)
@@ -264,7 +275,6 @@ if view_mode == "Dashboard":
         col3.metric("Discovered Links", len(all_connections))
 
 
-# Add a new note
 elif view_mode == "Add New Note":
 
     st.title("Create Note")
@@ -299,13 +309,12 @@ elif view_mode == "Add New Note":
             st.rerun()
 
 
-# Browse saved notes
 elif view_mode == "Browse Notes":
 
     st.title("Your Notebook")
 
     if not st.session_state.notes:
-        st.info("Nothing to show yet.")
+        show_message("Nothing to show yet.")
 
     else:
         search_query = st.text_input("Filter notes by keyword...")
@@ -342,7 +351,6 @@ elif view_mode == "Browse Notes":
         )
 
 
-# About page
 elif view_mode == "About App":
 
     st.title("About Nexora")
